@@ -1,0 +1,17 @@
+{
+  "name": "enhanced-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon . -e graphql,js"
+  },
+  "keywords": [],
+  "author": "Moon Highway",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "2.2.1",
+    "graphql": "14.0.2",
+    "nodemon": "1.18.6"
+  }
+}
