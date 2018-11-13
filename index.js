@@ -1,7 +1,9 @@
-const { ApolloServer } = require('apollo-server')
+const { ApolloServer, PubSub } = require('apollo-server')
 
 const lifts = require('./data/lifts.json')
 const trails = require('./data/trails.json')
+
+const pubsub = new PubSub()
 
 const typeDefs = `
 
@@ -51,6 +53,10 @@ const typeDefs = `
     setTrailStatus(id: ID!, status: TrailStatus!): Trail!
   }
 
+  type Subscription {
+    liftStatusChange: Lift
+    trailStatusChange: Trail
+  }
 `
 const resolvers = {
   Query: {
@@ -93,12 +99,24 @@ const resolvers = {
     setLiftStatus: (parent, { id, status }) => {
       let updatedLift = lifts.find(lift => id === lift.id)
       updatedLift.status = status
+      pubsub.publish('lift-status-change', { liftStatusChange: updatedLift })
       return updatedLift
     },
     setTrailStatus: (parent, { id, status }) => {
       let updatedTrail = trails.find(trail => id === trail.id)
       updatedTrail.status = status
+      pubsub.publish('trail-status-change', { trailStatusChange: updatedTrail })
       return updatedTrail
+    }
+  },
+  Subscription: {
+    liftStatusChange: {
+      subscribe: (root, data, { pubsub }) =>
+        pubsub.asyncIterator('lift-status-change')
+    },
+    trailStatusChange: {
+      subscribe: (root, data, { pubsub }) =>
+        pubsub.asyncIterator('trail-status-change')
     }
   },
   Lift: {
@@ -113,7 +131,8 @@ const resolvers = {
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
+  context: { pubsub }
 })
 
 server.listen().then(({ url }) => {
