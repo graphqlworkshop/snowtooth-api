@@ -121,11 +121,11 @@ const resolvers = {
   },
   Lift: {
     trailAccess: parent =>
-      parent.trails.map(id => trails.find(t => id === t.id))
+      parent.trails.map(id => trails.find(t => id === t.id)).filter(x => x)
   },
   Trail: {
     accessedByLifts: parent =>
-      parent.lift.map(id => lifts.find(l => id === l.id))
+      parent.lift.map(id => lifts.find(l => id === l.id)).filter(x => x)
   }
 }
 
