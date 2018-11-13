@@ -23,6 +23,8 @@ Take a look at the data folder.
 
 - Lifts Data: `data/lifts.json`
 
+Use the data to create a `Lift` type.
+
 ## Step 2: Lift Queries
 
 Create queries and descriptions for lift queries
@@ -38,6 +40,8 @@ Create queries and descriptions for lift queries
 Take a look at the data folder.
 
 - Trails Data: `data/trails.json`
+
+Use this data to create a `Trail` type
 
 ## Step 4: Trail Queries
 
@@ -58,7 +62,7 @@ Add mutations for setting lift status and setting trail status.
 | `setLiftStatus` | Arguments: `id`, `status` |
 | `allTrails`     | Arguments: `id`, `status` |
 
-## Connections
+## Step 6: Connections
 
 Add trivial resolvers to connect trails and lifts
 
