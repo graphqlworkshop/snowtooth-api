@@ -1,11 +1,11 @@
-const { ApolloServer, PubSub } = require('apollo-server')
+const { ApolloServer, gql } = require("apollo-server");
+const { GraphQLScalarType } = require("graphql");
 
-const lifts = require('./data/lifts.json')
-const trails = require('./data/trails.json')
+const lifts = require("./data/lifts.json");
+const trails = require("./data/trails.json");
 
-const pubsub = new PubSub()
-
-const typeDefs = `
+const typeDefs = gql`
+  scalar DateTime
 
   type Lift {
     id: ID
@@ -39,6 +39,11 @@ const typeDefs = `
     CLOSED
   }
 
+  type SetLiftStatusPayload {
+    lift: Lift
+    changed: DateTime
+  }
+
   type Query {
     allLifts(status: LiftStatus): [Lift!]!
     findLiftById(id: ID!): Lift!
@@ -49,74 +54,60 @@ const typeDefs = `
   }
 
   type Mutation {
-    setLiftStatus(id: ID!, status: LiftStatus!): Lift!
+    setLiftStatus(id: ID!, status: LiftStatus!): SetLiftStatusPayload!
     setTrailStatus(id: ID!, status: TrailStatus!): Trail!
   }
-
-  type Subscription {
-    liftStatusChange: Lift
-    trailStatusChange: Trail
-  }
-`
+`;
 const resolvers = {
   Query: {
     allLifts: (parent, { status }) => {
       if (!status) {
-        return lifts
+        return lifts;
       } else {
-        return lifts.filter(lift => lift.status === status)
+        return lifts.filter(lift => lift.status === status);
       }
     },
     findLiftById: (parent, { id }) => {
-      return lifts.find(lift => id === lift.id)
+      return lifts.find(lift => id === lift.id);
     },
     liftCount: (parent, { status }) => {
-      let i = 0
+      let i = 0;
       lifts.map(lift => {
-        lift.status === status ? i++ : null
-      })
-      return i
+        lift.status === status ? i++ : null;
+      });
+      return i;
     },
     allTrails: (parent, { status }) => {
       if (!status) {
-        return trails
+        return trails;
       } else {
-        return trails.filter(trail => trail.status === status)
+        return trails.filter(trail => trail.status === status);
       }
     },
     findTrailByName: (parent, { name }) => {
-      return trails.find(trail => name === trail.name)
+      return trails.find(trail => name === trail.name);
     },
     trailCount: (parent, { status }) => {
-      let i = 0
+      let i = 0;
       trails.map(trail => {
-        trail.status === status ? i++ : null
-      })
-      return i
+        trail.status === status ? i++ : null;
+      });
+      return i;
     }
   },
   Mutation: {
     setLiftStatus: (parent, { id, status }) => {
-      let updatedLift = lifts.find(lift => id === lift.id)
-      updatedLift.status = status
-      pubsub.publish('lift-status-change', { liftStatusChange: updatedLift })
-      return updatedLift
+      let updatedLift = lifts.find(lift => id === lift.id);
+      updatedLift.status = status;
+      return {
+        lift: updatedLift,
+        changed: new Date()
+      };
     },
     setTrailStatus: (parent, { id, status }) => {
-      let updatedTrail = trails.find(trail => id === trail.id)
-      updatedTrail.status = status
-      pubsub.publish('trail-status-change', { trailStatusChange: updatedTrail })
-      return updatedTrail
-    }
-  },
-  Subscription: {
-    liftStatusChange: {
-      subscribe: (root, data, { pubsub }) =>
-        pubsub.asyncIterator('lift-status-change')
-    },
-    trailStatusChange: {
-      subscribe: (root, data, { pubsub }) =>
-        pubsub.asyncIterator('trail-status-change')
+      let updatedTrail = trails.find(trail => id === trail.id);
+      updatedTrail.status = status;
+      return updatedTrail;
     }
   },
   Lift: {
@@ -126,15 +117,21 @@ const resolvers = {
   Trail: {
     accessedByLifts: parent =>
       parent.lift.map(id => lifts.find(l => id === l.id)).filter(x => x)
-  }
-}
+  },
+  DateTime: new GraphQLScalarType({
+    name: "DateTime",
+    description: "A valid date time value.",
+    parseValue: value => new Date(value),
+    serialize: value => new Date(value).toISOString(),
+    parseLiteral: ast => new Date(ast.value)
+  })
+};
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers,
-  context: { pubsub }
-})
+  resolvers
+});
 
 server.listen().then(({ url }) => {
-  console.log(`Server running at ${url}`)
-})
+  console.log(`Server running at ${url}`);
+});
