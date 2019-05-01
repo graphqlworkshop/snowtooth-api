@@ -2,7 +2,7 @@
 
 In this activity, you'll create an API for Snowtooth Mountain, a fake ski resort.
 
-## Step 0: Setup
+## Setup
 
 1. In your Terminal or Command Prompt, Download or Clone this Repository: `git clone https://github.com/graphqlworkshop/snowtooth-api`
 2. Change directory: `cd snowtooth-api`
