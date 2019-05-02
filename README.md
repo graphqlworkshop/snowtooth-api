@@ -9,4 +9,3 @@ In this activity, you'll create an API for Snowtooth Mountain, a fake ski resort
 3. Install dependencies: `npm install`
 4. Start the Server: `npm start`
 5. Open the browser to: `http://localhost:4000`
-6. Send a test query:
