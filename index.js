@@ -44,8 +44,6 @@ const typeDefs = gql`
     changed: DateTime
   }
 
-  union SearchResult = Lift | Trail
-
   type Query {
     allLifts(status: LiftStatus): [Lift!]!
     findLiftById(id: ID!): Lift!
@@ -53,7 +51,6 @@ const typeDefs = gql`
     allTrails(status: TrailStatus): [Trail!]!
     findTrailByName(name: String!): Trail!
     trailCount(status: TrailStatus!): Int!
-    search(term: String, status: LiftStatus): [SearchResult!]!
   }
 
   type Mutation {
@@ -96,28 +93,6 @@ const resolvers = {
         trail.status === status ? i++ : null;
       });
       return i;
-    },
-    search: (parent, { term, status }) => {
-      let liftsNTrails = [...lifts, ...trails];
-
-      const byTerm = t => item =>
-        t.toLowerCase() === item.id.substr(0, t.length).toLowerCase();
-
-      const byStatus = status => item =>
-        status.toLowerCase() === item.status.toLowerCase();
-
-      if (term && status) {
-        liftsNTrails = liftsNTrails.filter(byTerm(term));
-        liftsNTrails = liftsNTrails.filter(byStatus(status));
-      } else if (term) {
-        liftsNTrails = liftsNTrails.filter(byTerm(term));
-      } else if (status) {
-        liftsNTrails = liftsNTrails.filter(byStatus(status));
-      } else {
-        liftsNTrails = [];
-      }
-
-      return liftsNTrails;
     }
   },
   Mutation: {
