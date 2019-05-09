@@ -10,7 +10,7 @@
   "author": "Moon Highway",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "2.2.1",
+    "apollo-server": "2.5.0",
     "graphql": "14.0.2",
     "nodemon": "1.18.6"
   }
