@@ -60,40 +60,21 @@ const typeDefs = gql`
 `;
 const resolvers = {
   Query: {
-    allLifts: (parent, { status }) => {
-      if (!status) {
-        return lifts;
-      } else {
-        return lifts.filter(lift => lift.status === status);
-      }
-    },
-    findLiftById: (parent, { id }) => {
-      return lifts.find(lift => id === lift.id);
-    },
-    liftCount: (parent, { status }) => {
-      let i = 0;
-      lifts.map(lift => {
-        lift.status === status ? i++ : null;
-      });
-      return i;
-    },
-    allTrails: (parent, { status }) => {
-      if (!status) {
-        return trails;
-      } else {
-        return trails.filter(trail => trail.status === status);
-      }
-    },
-    findTrailByName: (parent, { name }) => {
-      return trails.find(trail => name === trail.name);
-    },
-    trailCount: (parent, { status }) => {
-      let i = 0;
-      trails.map(trail => {
-        trail.status === status ? i++ : null;
-      });
-      return i;
-    }
+    allLifts: (parent, { status }) =>
+      !status ? lifts : lifts.filter(lift => lift.status === status),
+    findLiftById: (parent, { id }) => lifts.find(lift => id === lift.id),
+    liftCount: (parent, { status }) =>
+      !status
+        ? lifts.length
+        : lifts.filter(lift => lift.status === status).length,
+    allTrails: (parent, { status }) =>
+      !status ? trails : trails.filter(trail => trail.status === status),
+    findTrailByName: (parent, { name }) =>
+      trails.find(trail => name === trail.name),
+    trailCount: (parent, { status }) =>
+      !status
+        ? trails.length
+        : trails.filter(trail => trail.status === status).length
   },
   Mutation: {
     setLiftStatus: (parent, { id, status }) => {
@@ -112,7 +93,7 @@ const resolvers = {
   },
   Lift: {
     trailAccess: parent =>
-      parent.trails.map(id => trails.find(t => id === t.id)).filter(x => x)
+      parent.trails.map(id => trails.find(t => id === t.id))
   },
   Trail: {
     accessedByLifts: parent =>
