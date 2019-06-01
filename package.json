@@ -8,10 +8,10 @@
   },
   "keywords": [],
   "author": "Moon Highway",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "apollo-server": "^2.5.0",
-    "graphql": "^14.3.0",
-    "nodemon": "^1.18.6"
+    "apollo-server": "2.5.0",
+    "graphql": "14.3.0",
+    "nodemon": "1.18.6"
   }
 }
