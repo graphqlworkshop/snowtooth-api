@@ -561,17 +561,6 @@
     "id": "slippy-stream"
   },
   {
-    "name": "Thunder",
-    "lift": ["wallys"],
-    "difficulty": "beginner",
-    "status": "CLOSED",
-    "groomed": true,
-    "snowmaking": true,
-    "trees": false,
-    "night": true,
-    "id": "thunder"
-  },
-  {
     "name": "Peacock",
     "lift": ["wallys"],
     "difficulty": "beginner",
