@@ -10,7 +10,7 @@
   "author": "Moon Highway",
   "license": "MIT",
   "dependencies": {
-    "apollo-server": "^2.16.1",
+    "apollo-server": "^2.25.3",
     "graphql": "^15.3.0",
     "nodemon": "^2.0.4"
   }
