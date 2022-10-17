@@ -327,7 +327,7 @@
     "snowmaking": false,
     "trees": true,
     "night": false,
-    "id": "the-terrible chute"
+    "id": "the-terrible-chute"
   },
   {
     "name": "Magma Chute",
@@ -559,17 +559,6 @@
     "trees": false,
     "night": true,
     "id": "slippy-stream"
-  },
-  {
-    "name": "Thunder",
-    "lift": ["wallys"],
-    "difficulty": "beginner",
-    "status": "CLOSED",
-    "groomed": true,
-    "snowmaking": true,
-    "trees": false,
-    "night": true,
-    "id": "thunder"
   },
   {
     "name": "Peacock",

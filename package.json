@@ -1,5 +1,5 @@
 {
-  "name": "enhanced-api",
+  "name": "snowtooth-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,8 +10,9 @@
   "author": "Moon Highway",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "^2.9.3",
-    "graphql": "^14.5.4",
-    "nodemon": "^1.19.2"
+    "@apollo/server": "^4.0.0",
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6",
+    "nodemon": "^2.0.20"
   }
 }
