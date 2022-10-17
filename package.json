@@ -9,5 +9,7 @@
   "keywords": [],
   "author": "Moon Highway",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "nodemon": "^2.0.20"
+  }
 }
