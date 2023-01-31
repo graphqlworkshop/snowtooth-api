@@ -141,7 +141,7 @@ app.use(
   expressMiddleware(server)
 );
 
-const PORT = 4000;
+const PORT = process.env.PORT || "8080";
 // Now that our HTTP server is fully set up, we can listen to it.
 httpServer.listen(PORT, () => {
   console.log(
