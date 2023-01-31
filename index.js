@@ -1,70 +1,26 @@
-const { ApolloServer } = require("@apollo/server");
-const {
-  startStandaloneServer,
-} = require("@apollo/server/standalone");
-const { gql } = require("graphql-tag");
-const { GraphQLScalarType } = require("graphql");
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { createServer } from "http";
+import express from "express";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
+import bodyParser from "body-parser";
+import cors from "cors";
+import { readFileSync } from "fs";
+import { PubSub } from "graphql-subscriptions";
+import { GraphQLScalarType } from "graphql";
+import lifts from "./data/lifts.json" assert { type: "json" };
+import trails from "./data/trails.json" assert { type: "json" };
 
-const lifts = require("./data/lifts.json");
-const trails = require("./data/trails.json");
+const pubsub = new PubSub();
 
-const typeDefs = gql`
-  scalar DateTime
+const schemaString = readFileSync(
+  "./typeDefs.graphql",
+  "UTF-8"
+);
 
-  type Lift {
-    id: ID
-    name: String!
-    status: LiftStatus!
-    capacity: Int!
-    night: Boolean!
-    elevationGain: Int!
-    trailAccess: [Trail!]!
-  }
-
-  type Trail {
-    id: ID
-    name: String!
-    status: TrailStatus
-    difficulty: String!
-    groomed: Boolean!
-    trees: Boolean!
-    night: Boolean!
-    accessedByLifts: [Lift!]!
-  }
-
-  enum LiftStatus {
-    OPEN
-    HOLD
-    CLOSED
-  }
-
-  enum TrailStatus {
-    OPEN
-    CLOSED
-  }
-
-  type SetLiftStatusPayload {
-    lift: Lift
-    changed: DateTime
-  }
-
-  type Query {
-    allLifts(status: LiftStatus): [Lift!]!
-    findLiftById(id: ID!): Lift!
-    liftCount(status: LiftStatus!): Int!
-    allTrails(status: TrailStatus): [Trail!]!
-    findTrailByName(name: String!): Trail!
-    trailCount(status: TrailStatus!): Int!
-  }
-
-  type Mutation {
-    setLiftStatus(
-      id: ID!
-      status: LiftStatus!
-    ): SetLiftStatusPayload!
-    setTrailStatus(id: ID!, status: TrailStatus!): Trail!
-  }
-`;
 const resolvers = {
   Query: {
     allLifts: (parent, { status }) =>
@@ -96,6 +52,12 @@ const resolvers = {
         (lift) => id === lift.id
       );
       updatedLift.status = status;
+      pubsub.publish("lift-status-change", {
+        liftStatusChange: {
+          lift: updatedLift,
+          changed: new Date(),
+        },
+      });
       return {
         lift: updatedLift,
         changed: new Date(),
@@ -128,15 +90,61 @@ const resolvers = {
     serialize: (value) => new Date(value).toISOString(),
     parseLiteral: (ast) => new Date(ast.value),
   }),
+  Subscription: {
+    liftStatusChange: {
+      subscribe: (parent, data) =>
+        pubsub.asyncIterator("lift-status-change"),
+    },
+  },
 };
 
-async function startApolloServer() {
-  const server = new ApolloServer({ typeDefs, resolvers });
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
-  });
+const schema = makeExecutableSchema({
+  typeDefs: schemaString,
+  resolvers,
+});
 
-  console.log(`🚠 Snowtooth Server Running at ${url}`);
-}
+const app = express();
+const httpServer = createServer(app);
 
-startApolloServer();
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: "/graphql",
+});
+
+const serverCleanup = useServer({ schema }, wsServer);
+
+// Set up ApolloServer.
+const server = new ApolloServer({
+  schema,
+  plugins: [
+    // Proper shutdown for the HTTP server.
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+
+    // Proper shutdown for the WebSocket server.
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose();
+          },
+        };
+      },
+    },
+  ],
+});
+
+await server.start();
+app.use(
+  "/graphql",
+  cors(),
+  bodyParser.json(),
+  expressMiddleware(server)
+);
+
+const PORT = 4000;
+// Now that our HTTP server is fully set up, we can listen to it.
+httpServer.listen(PORT, () => {
+  console.log(
+    `Server is now running on http://localhost:${PORT}/graphql`
+  );
+});

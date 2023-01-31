@@ -1,0 +1,59 @@
+scalar DateTime
+
+type Lift {
+  id: ID
+  name: String!
+  status: LiftStatus!
+  capacity: Int!
+  night: Boolean!
+  elevationGain: Int!
+  trailAccess: [Trail!]!
+}
+
+type Trail {
+  id: ID
+  name: String!
+  status: TrailStatus
+  difficulty: String!
+  groomed: Boolean!
+  trees: Boolean!
+  night: Boolean!
+  accessedByLifts: [Lift!]!
+}
+
+enum LiftStatus {
+  OPEN
+  HOLD
+  CLOSED
+}
+
+enum TrailStatus {
+  OPEN
+  CLOSED
+}
+
+type SetLiftStatusPayload {
+  lift: Lift
+  changed: DateTime
+}
+
+type Query {
+  allLifts(status: LiftStatus): [Lift!]!
+  findLiftById(id: ID!): Lift!
+  liftCount(status: LiftStatus!): Int!
+  allTrails(status: TrailStatus): [Trail!]!
+  findTrailByName(name: String!): Trail!
+  trailCount(status: TrailStatus!): Int!
+}
+
+type Mutation {
+  setLiftStatus(
+    id: ID!
+    status: LiftStatus!
+  ): SetLiftStatusPayload!
+  setTrailStatus(id: ID!, status: TrailStatus!): Trail!
+}
+
+type Subscription {
+  liftStatusChange: SetLiftStatusPayload!
+}
