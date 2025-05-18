@@ -1,12 +1,9 @@
-const { ApolloServer } = require("@apollo/server");
-const {
-  startStandaloneServer,
-} = require("@apollo/server/standalone");
-const { gql } = require("graphql-tag");
-const { GraphQLScalarType } = require("graphql");
-
-const lifts = require("./data/lifts.json");
-const trails = require("./data/trails.json");
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import { gql } from "graphql-tag";
+import { GraphQLScalarType } from "graphql";
+import lifts from "./data/lifts.json" assert { type: "json" };
+import trails from "./data/trails.json" assert { type: "json" };
 
 const typeDefs = gql`
   scalar DateTime
@@ -88,7 +85,7 @@ const resolvers = {
       !status
         ? trails.length
         : trails.filter((trail) => trail.status === status)
-            .length,
+            .length
   },
   Mutation: {
     setLiftStatus: (parent, { id, status }) => {
@@ -98,7 +95,7 @@ const resolvers = {
       updatedLift.status = status;
       return {
         lift: updatedLift,
-        changed: new Date(),
+        changed: new Date()
       };
     },
     setTrailStatus: (parent, { id, status }) => {
@@ -107,33 +104,33 @@ const resolvers = {
       );
       updatedTrail.status = status;
       return updatedTrail;
-    },
+    }
   },
   Lift: {
     trailAccess: (parent) =>
       parent.trails.map((id) =>
         trails.find((t) => id === t.id)
-      ),
+      )
   },
   Trail: {
     accessedByLifts: (parent) =>
       parent.lift.map((id) =>
         lifts.find((l) => id === l.id)
-      ),
+      )
   },
   DateTime: new GraphQLScalarType({
     name: "DateTime",
     description: "A valid date time value.",
     parseValue: (value) => new Date(value),
     serialize: (value) => new Date(value).toISOString(),
-    parseLiteral: (ast) => new Date(ast.value),
-  }),
+    parseLiteral: (ast) => new Date(ast.value)
+  })
 };
 
 async function startApolloServer() {
   const server = new ApolloServer({ typeDefs, resolvers });
   const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
+    listen: { port: 4000 }
   });
 
   console.log(`🚠 Snowtooth Server Running at ${url}`);
