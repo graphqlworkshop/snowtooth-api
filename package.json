@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/server": "4.12.1",
-    "graphql": "^16.11.0",
+    "graphql": "16.11.0",
     "graphql-tag": "2.12.6",
     "nodemon": "3.1.10"
   }
